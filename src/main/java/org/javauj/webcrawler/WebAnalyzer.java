@@ -17,7 +17,7 @@ import org.jsoup.select.Elements;
 public class WebAnalyzer extends Observable {
 	
 	
-	synchronized public AnalyzeResult analyzePage(URL url)
+	synchronized public AnalyzeResult analyzePage(URL url) throws IOException
 	{
 		String pageHtml = downloadPage(url);
 		LinksAndImages linksAndImages = scanForLinksAndImages(pageHtml, url.toString());
@@ -32,10 +32,12 @@ public class WebAnalyzer extends Observable {
 	}
 	
 	
-	String downloadPage(URL url) {
+	String downloadPage(URL url) throws IOException {
+		URLConnection uc;
+		BufferedReader in = null;
 		try{
-			URLConnection uc = url.openConnection();
-			BufferedReader in = new BufferedReader(new InputStreamReader(uc.getInputStream()));
+			uc = url.openConnection();
+			in = new BufferedReader(new InputStreamReader(uc.getInputStream()));
 			
 			StringBuilder pageBuilder = new StringBuilder();
 			String line;
@@ -44,10 +46,13 @@ public class WebAnalyzer extends Observable {
 			}
 			in.close();
 			return pageBuilder.toString();
-		} catch(IOException e ) {
-			e.printStackTrace();
+		} finally
+		{
+			if (in != null)
+			{
+				in.close();
+			}
 		}
-		return null;
 	}
 	
 	public LinksAndImages scanForLinksAndImages(String html, String baseURI) {

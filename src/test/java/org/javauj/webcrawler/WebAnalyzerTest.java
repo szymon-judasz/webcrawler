@@ -44,7 +44,12 @@ public class WebAnalyzerTest extends TestCase{
 			e.printStackTrace();
 			assertTrue(false);
 		}
-		AnalyzeResult result = obj.analyzePage(url);
+		try {
+			AnalyzeResult result = obj.analyzePage(url);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		//assertEquals(new Integer(41), result);
 		assertTrue(true);
 	}

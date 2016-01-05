@@ -4,14 +4,17 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Stack;
 
+import javax.management.RuntimeErrorException;
 import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -21,6 +24,7 @@ public class Controller{
 	public SQLiteLogger logger;
 	public Stack<URL> history;
 	URL currentURL;
+	URL analyzingURL;
 	
 	public void run()
 	{
@@ -67,9 +71,8 @@ public class Controller{
 			public void actionPerformed(ActionEvent e) {
 				if (history.isEmpty())
 					return;
-				URL latestUrl = history.pop();
-				System.out.println(latestUrl);
-				analyzeAndBind(latestUrl);
+				URL latestUrl = history.peek();
+				analyzeAndBind(latestUrl, false); // swing dispatcher
 			}
 		});
 		// LINK CLICKED
@@ -77,9 +80,7 @@ public class Controller{
 			
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				View.returnButton.setVisible(false);
-				history.push(currentURL);
-				analyzeAndBind(View.list.getSelectedValue());
+				analyzeAndBind(View.list.getSelectedValue(), true); // swing dispatcher
 			}
 			@Override
 			public void mousePressed(MouseEvent e) {}
@@ -91,36 +92,71 @@ public class Controller{
 			public void mouseClicked(MouseEvent e) {}
 		});
 		
-		
-		analyzeAndBind(currentURL);
+		javax.swing.SwingUtilities.invokeLater(new Runnable() {
+			
+			@Override
+			public void run() {
+				analyzeAndBind(currentURL, true); // from EDT
+			}
+		});
+
 	}
 	
 
-
-
-	private void analyzeAndBind(URL url) // dispatch new thread return
+	public void setEnableComponents(boolean enable)
 	{
-		
-		AnalyzeResult result = webAnalyzer.analyzePage(url);
+		View.returnButton.setEnabled(enable);
+		View.list.setEnabled(enable);
+	}
 
-		javax.swing.SwingUtilities.invokeLater(new Runnable() { // 
+	private void analyzeAndBind(URL url, boolean newPage) // should always be called from edt
+	{
+		if(!javax.swing.SwingUtilities.isEventDispatchThread())
+			throw new RuntimeException("Code execution not from EDT");
+		setEnableComponents(false);
+		
+		new SwingWorker<AnalyzeResult, Object>() {
+			AnalyzeResult result;
 			@Override
-			public void run() {
-				View.returnButton.setEnabled(false);
-				View.list.setVisible(false);
-				System.out.println(Thread.currentThread().getName());
-				((DefaultListModel<URL>)View.list.getModel()).clear();
-				for(URL u : result.links)
-				{
-					((DefaultListModel<URL>)View.list.getModel()).addElement(u);
+			protected AnalyzeResult doInBackground(){
+				try {
+					result = webAnalyzer.analyzePage(url);
+				} catch (IOException e) {
+					return null;
 				}
-				View.sumLabel.setText("Img: " + result.numberOfImages.toString());
-				View.totalSizeLabel.setText("Size: " + result.totalSizeOfImages + " B");
-				View.returnButton.setEnabled(true);
-				View.returnButton.setVisible(true);
-				View.list.setVisible(true);
+				return result;
 			}
-		});
+			
+			@Override 
+			protected void done()
+			{
+				if(!javax.swing.SwingUtilities.isEventDispatchThread())
+				{
+					throw new RuntimeException("not EDT");
+				}
+				if(result != null)
+				{
+					((DefaultListModel<URL>)View.list.getModel()).clear();
+					for(URL u : result.links)
+					{
+						((DefaultListModel<URL>)View.list.getModel()).addElement(u);
+					}
+					View.sumLabel.setText("Img: " + result.numberOfImages.toString());
+					View.totalSizeLabel.setText("Size: " + result.totalSizeOfImages + " B");
+					
+					if (newPage)
+					{
+						history.push(currentURL);
+					} else
+					{
+						history.pop();
+					}
+					currentURL = url;
+				}
+				setEnableComponents(true);
+			}
+		}.execute();
+
 	}
 	
 	public static void main(String[] args)

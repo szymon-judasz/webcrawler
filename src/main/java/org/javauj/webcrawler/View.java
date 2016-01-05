@@ -38,6 +38,7 @@ public class View{
 		c.gridx = 0;
 		c.gridy = 0;
 		c.gridwidth = 2;
+		c.ipady = 30;
 		pane.add(returnButton, c);
 		
 		totalSizeLabel = new JLabel("Size:");
