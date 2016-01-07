@@ -28,6 +28,8 @@ public class WebAnalyzer extends Observable {
 		result.links = linksAndImages.links;
 		result.totalSizeOfImages = totalSizeOfImages;
 		result.numberOfImages = numberOfImages;
+		setChanged();
+		notifyObservers(url);
 		return result;
 	}
 	
@@ -64,7 +66,8 @@ public class WebAnalyzer extends Observable {
 			try {
 				result.links.add(new URL(e.attr("abs:href")));
 			} catch (MalformedURLException e1) {
-				e1.printStackTrace();
+				System.err.println("Error during parsing link: " + e.outerHtml());
+				//e1.printStackTrace();
 			}
 		}
 		for (Element e : images)
@@ -72,7 +75,8 @@ public class WebAnalyzer extends Observable {
 			try {
 				result.images.add(new URL(e.attr("abs:src")));
 			} catch (MalformedURLException e1) {
-				e1.printStackTrace();
+				System.err.println("Error during parsing image link: " + e.outerHtml());
+				//e1.printStackTrace();
 			}
 		}
 		return result;
