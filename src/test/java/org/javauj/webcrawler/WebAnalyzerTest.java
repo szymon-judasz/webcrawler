@@ -32,7 +32,7 @@ public class WebAnalyzerTest extends TestCase{
 		assertEquals(new Integer(41), result);
 	}
 
-	public void testAnalyzePageWithNoImages()
+	/*public void testAnalyzePageWithNoImages()
 	{
 		URL url = null;
 		WebAnalyzer obj = new WebAnalyzer();
@@ -53,5 +53,26 @@ public class WebAnalyzerTest extends TestCase{
 		//assertEquals(new Integer(41), result);
 		assertTrue(true);
 	}
+	public void testHttpsConnection()
+	{
+		URL url = null;
+		WebAnalyzer obj = new WebAnalyzer();
+		try
+		{
+			url = new URL("https://www.nasa.gov/multimedia/imagegallery/index.html");
+		} catch (IOException e)
+		{
+			e.printStackTrace();
+			assertTrue(false);
+		}
+		try {
+			AnalyzeResult result = obj.analyzePage(url);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		//assertEquals(new Integer(41), result);
+		assertTrue(true);
+	}*/
 	
 }
