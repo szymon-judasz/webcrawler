@@ -4,19 +4,17 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Stack;
 
-import javax.management.RuntimeErrorException;
 import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 public class Controller{
 	public Controller controller;
@@ -33,8 +31,7 @@ public class Controller{
 		logger = new SQLiteLogger("history.db", false);
 		webAnalyzer.addObserver(logger);
 		history = new Stack<>();
-		
-		
+
 		currentURL = null;
 		while(currentURL == null)
 		{
@@ -93,10 +90,17 @@ public class Controller{
 		});
 		
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
-			
 			@Override
 			public void run() {
 				analyzeAndBind(currentURL, true); // from EDT
+			}
+		});
+		final SQLiteLogger working_logger = logger;
+		View.frame.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent evt)
+			{
+				working_logger.close();
 			}
 		});
 

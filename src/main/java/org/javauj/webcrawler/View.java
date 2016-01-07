@@ -1,12 +1,9 @@
 package org.javauj.webcrawler;
 
-import java.awt.ComponentOrientation;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.swing.DefaultListModel;
@@ -14,9 +11,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 
 public class View{
@@ -27,6 +22,7 @@ public class View{
 	public static JList<URL> list;
 	public static JLabel totalSizeLabel;
 	public static JLabel sumLabel;
+	public static JFrame frame;
 	
 	public static void addComponentsToPane(Container pane)
 	{
@@ -72,9 +68,9 @@ public class View{
 	
 	public static void createAndShowGUI() {
 		// Create and set up the window.
-		JFrame frame = new JFrame("Webcrawler");
+		frame = new JFrame("Webcrawler");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		// Create Jpanel
+		
 		addComponentsToPane(frame.getContentPane());
 		// Display the window.
 		frame.pack();
