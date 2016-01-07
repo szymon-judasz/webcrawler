@@ -27,8 +27,8 @@ public class SQLiteLogger implements Closeable, Observer {
 			statement.setQueryTimeout(30);
 			if(purgeOldDb){
 				statement.executeUpdate("Drop table if exists " + tablename);
-				statement.executeUpdate("Create table " + tablename + tableDefinition);
 			}
+			statement.executeUpdate("Create table IF NOT EXISTS " + tablename  + tableDefinition);
 			
 			connectionEstablished = true;
 		} catch (ClassNotFoundException | SQLException e) {
