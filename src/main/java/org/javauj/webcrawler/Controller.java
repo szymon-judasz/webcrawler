@@ -30,7 +30,7 @@ public class Controller{
 	{
 		controller = new Controller();
 		webAnalyzer = new WebAnalyzer();
-		logger = new SQLiteLogger("history.db", true);
+		logger = new SQLiteLogger("history.db", false);
 		webAnalyzer.addObserver(logger);
 		history = new Stack<>();
 		
@@ -109,12 +109,11 @@ public class Controller{
 		View.list.setEnabled(enable);
 	}
 
-	private void analyzeAndBind(URL url, boolean newPage) // should always be called from edt
+	private void analyzeAndBind(final URL url, final boolean newPage) // should always be called from edt
 	{
 		if(!javax.swing.SwingUtilities.isEventDispatchThread())
 			throw new RuntimeException("Code execution not from EDT");
 		setEnableComponents(false);
-		
 		new SwingWorker<AnalyzeResult, Object>() {
 			AnalyzeResult result;
 			@Override
